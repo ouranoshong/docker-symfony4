@@ -96,10 +96,27 @@ services:
       - frontend
       - backend
 
+### php pm container ############################################
+
+  ppm:
+    build:
+      context: ./php-pm
+      dockerfile: "Dockerfile"
+    command: --debug=1 --app-env=dev --static-directory=public/
+    volumes_from:
+      - applications
+    tty: true
+    environment:
+      - VIRTUAL_HOST=symfony.local
+    networks:
+      - frontend
+      - backend
+      - nginx-proxy
+
 ### Networks Setup ############################################
 
 networks:
   frontend:
-    driver: "bridge"
   backend:
-    driver: "bridge"
+  nginx-proxy:
+    external: true

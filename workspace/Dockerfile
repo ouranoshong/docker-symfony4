@@ -1,4 +1,5 @@
-FROM laradock/workspace:2.0-72
+ARG PHP_VERSION=${PHP_VERSION}
+FROM laradock/workspace:2.2-${PHP_VERSION}
 
 LABEL name="ouranoshong"
 LABEL email="ouranoshong@outlook.com"
@@ -26,11 +27,12 @@ RUN groupadd -g ${PGID} symdock && \
 #####################################
 
 ARG INSTALL_IMAP=false
+ARG PHP_VERSION=${PHP_VERSION}
 ENV INSTALL_IMAP ${INSTALL_IMAP}
 
 RUN if [ ${INSTALL_IMAP} = true ]; then \
     apt-get update -yqq && \
-    apt-get install -y php7.2-imap \
+    apt-get install -y php${PHP_VERSION}-imap \
 ;fi
 
 #####################################
@@ -93,14 +95,15 @@ RUN echo "" >> ~/.bashrc && \
 #####################################
 
 ARG INSTALL_XDEBUG=false
+ARG PHP_VERSION=${PHP_VERSION}
 RUN if [ ${INSTALL_XDEBUG} = true ]; then \
     apt-get update && \
-    apt-get install -y --force-yes php7.2-xdebug && \
-    sed -i 's/^;//g' /etc/php/7.2/cli/conf.d/20-xdebug.ini && \
+    apt-get install -y --force-yes php${PHP_VERSION}-xdebug && \
+    sed -i 's/^;//g' /etc/php/${PHP_VERSION}/cli/conf.d/20-xdebug.ini && \
     echo "alias phpunit='php -dzend_extension=xdebug.so /var/www/vendor/bin/phpunit'" >> ~/.bashrc \
 ;fi
 # ADD for REMOTE debugging
-COPY ./xdebug.ini /etc/php/7.2/cli/conf.d/xdebug.ini
+COPY ./xdebug.ini /etc/php/${PHP_VERSION}/cli/conf.d/xdebug.ini
 
 #####################################
 # ssh:
@@ -129,11 +132,12 @@ RUN if [ ${INSTALL_WORKSPACE_SSH} = true ]; then \
 
 # Check if Mongo needs to be installed
 ARG INSTALL_MONGO=false
+ARG PHP_VERSION=${PHP_VERSION}}
 ENV INSTALL_MONGO ${INSTALL_MONGO}
 RUN if [ ${INSTALL_MONGO} = true ]; then \
     pecl -q install mongodb && \
-    echo "extension=mongodb.so" >> /etc/php/7.2/mods-available/mongodb.ini && \
-    ln -s /etc/php/7.2/mods-available/mongodb.ini /etc/php/7.2/cli/conf.d/30-mongodb.ini \
+    echo "extension=mongodb.so" >> /etc/php/${PHP_VERSION}/mods-available/mongodb.ini && \
+    ln -s /etc/php/${PHP_VERSION}/mods-available/mongodb.ini /etc/php/${PHP_VERSION}/cli/conf.d/30-mongodb.ini \
 ;fi
 
 #####################################
@@ -153,10 +157,11 @@ RUN if [ ${INSTALL_AMQP} = true ]; then \
 #####################################
 
 ARG INSTALL_PHPREDIS=false
+ARG PHP_VERSION=${PHP_VERSION}
 ENV INSTALL_PHPREDIS ${INSTALL_PHPREDIS}
 RUN if [ ${INSTALL_PHPREDIS} = true ]; then \
     printf "\n" | pecl -q install -o -f redis && \
-    echo "extension=redis.so" >> /etc/php/7.2/mods-available/redis.ini && \
+    echo "extension=redis.so" >> /etc/php/${PHP_VERSION}/mods-available/redis.ini && \
     phpenmod redis \
 ;fi
 
@@ -165,10 +170,11 @@ RUN if [ ${INSTALL_PHPREDIS} = true ]; then \
 #####################################
 
 ARG INSTALL_SWOOLE=false
+ARG PHP_VERSION=${PHP_VERSION}
 RUN if [ ${INSTALL_SWOOLE} = true ]; then \
     pecl -q install swoole && \
-    echo "extension=swoole.so" >> /etc/php/7.2/mods-available/swoole.ini && \
-    ln -s /etc/php/7.2/mods-available/swoole.ini /etc/php/7.2/cli/conf.d/20-swoole.ini \
+    echo "extension=swoole.so" >> /etc/php/${PHP_VERSION}/mods-available/swoole.ini && \
+    ln -s /etc/php/${PHP_VERSION}/mods-available/swoole.ini /etc/php/${PHP_VERSION}/cli/conf.d/20-swoole.ini \
 ;fi
 
 
@@ -237,7 +243,7 @@ RUN if [ ${INSTALL_IMAGEMAGICK} = true ]; then \
 # Check PHP version:
 #####################################
 
-RUN php -v | head -n 1 | grep -q "PHP 7.2."
+RUN php -v | head -n 1 | grep -q "PHP ${PHP_VERSION}."
 
 #
 #--------------------------------------------------------------------------

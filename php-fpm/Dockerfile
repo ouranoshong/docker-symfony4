@@ -1,4 +1,5 @@
-FROM laradock/php-fpm:2.0-72
+ARG PHP_VERSION={PHP_VERSION}
+FROM laradock/php-fpm:2.2-${PHP_VERSION}
 
 LABEL name="ouranoshong"
 LABEL email="ouranoshong@outlook.com"
@@ -173,7 +174,7 @@ RUN if [ ${INSTALL_IMAP} = true ]; then \
 # Check PHP version:
 #####################################
 
-RUN php -v | head -n 1 | grep -q "PHP 7.2."
+RUN php -v | head -n 1 | grep -q "PHP ${PHP_VERSION}."
 
 #
 #--------------------------------------------------------------------------
